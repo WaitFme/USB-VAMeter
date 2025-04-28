@@ -5,9 +5,10 @@
 
 viewState uistate;
 
-void displayInit(uint8_t screen) {
+void displayInit(uint8_t index) {
     LCD_Fill(0, 0, LCD_W, LCD_H, BLACK);
-    if (screen == 0) {
+
+    if (index == 0) {
         LCD_ShowImage(0, 0, 28, 80, (uint16_t *)head_icon);
 
         LCD_ShowString(8, 2, "U", WHITE, BLACK, 24, 0);
@@ -18,10 +19,10 @@ void displayInit(uint8_t screen) {
         LCD_ShowString(35, 28, "0.000", WHITE, BLACK, 32, 0);
         LCD_ShowString(35, 54, "0.000", WHITE, BLACK, 32, 0);
 
-        LCD_ShowString(125, 2, "V", 0xfe00, BLACK, 24, 0);
-        LCD_ShowString(125, 28, "A", 0xa6a7, BLACK, 24, 0);
-        LCD_ShowString(125, 54, "W", 0x2c1c, BLACK, 24, 0);
-    } else if (screen == 1) {
+        LCD_ShowCharCustom(121, 2, 'V', MY_YELLOW, BLACK, 16, 28, 0);
+        LCD_ShowCharCustom(121, 28, 'A', MY_GREEN, BLACK, 16, 28, 0);
+        LCD_ShowCharCustom(121, 54, 'W', MY_BLUE, BLACK, 16, 28, 0);
+    } else if (index == 1) {
         LCD_ShowChinese(5, 5, 0, 12, BLUE, BLACK, 0);
         LCD_ShowChinese(17, 5, 1, 12, BLUE, BLACK, 0);
         LCD_ShowChinese(29, 5, 2, 12, BLUE, BLACK, 0);
@@ -56,31 +57,31 @@ void displayInit(uint8_t screen) {
         LCD_ShowString(41, 58, "o", RED, BLACK, 12, 0);
         LCD_ShowString(48, 60, "C", RED, BLACK, 16, 0);
     } else {
-        // LCD_Fill(27, 2, 133, 78, 0xfe00);
+        // LCD_Fill(27, 2, 133, 78, MY_YELLOW);
 
-        // LCD_Fill(56, 2, 80, 78, 0xa6a7);
-        // LCD_Fill(80, 2, 133, 52, 0xa6a7);
+        // LCD_Fill(56, 2, 80, 78, MY_GREEN);
+        // LCD_Fill(80, 2, 133, 52, MY_GREEN);
 
-        // LCD_Fill(85, 2, 109, 78, 0x2c1c);
-        // LCD_Fill(85, 2, 133, 27, 0x2c1c);
+        // LCD_Fill(85, 2, 109, 78, MY_BLUE);
+        // LCD_Fill(85, 2, 133, 27, MY_BLUE);
     }
 }
 
-void screens(uint8_t screen) {
+void screens(uint8_t index) {
     uint8_t x = uistate.rotation ^ uistate.currDirection;
-    if (screen == 0) {
+    if (index == 0) {
         LCD_ShowSmartFloatEx(35, 2, uistate.voltage, 5, WHITE, BLACK, 16, 28, 1);
         LCD_ShowSmartFloatEx(35, 28, uistate.current, 5, WHITE, BLACK, 16, 28, 1);
         LCD_ShowSmartFloatEx(35, 54, uistate.power, 5, WHITE, BLACK, 16, 28, 1);
-        if (uistate.currDirection!= -1) {
-            LCD_ShowString(150, 34, x ? ">" : "<", WHITE, BLACK, 12, 0);
+        if (uistate.currDirection != -1) {
+            LCD_ShowString(150, 34, x ? ">" : "<", MY_GREEN, BLACK, 12, 0);
         }
-    } else if (screen == 1) {
+    } else if (index == 1) {
         LCD_ShowSmartFloat(97, 2, uistate.voltage, 5, WHITE, ORANGE, 16, 1);
         LCD_ShowSmartFloat(97, 22, uistate.current, 5, WHITE, SGREEN, 16, 1);
         LCD_ShowSmartFloat(97, 42, uistate.power, 5, WHITE, GRAYBLUE, 16, 1);
         if (uistate.currDirection != -1) {
-            LCD_ShowString(2, 34, x ? ">" : "<", WHITE, BLACK, 12, 0);
+            LCD_ShowString(2, 34, x ? ">" : "<", MY_GREEN, BLACK, 12, 0);
         }
         LCD_ShowSmartFloat(5, 60, uistate.temperature, 5, RED, BLACK, 16, 1);
         LCD_ShowSmartFloat(97, 62, uistate.electricity, 4, WHITE, BRRED, 16, 1);
@@ -88,35 +89,18 @@ void screens(uint8_t screen) {
     }
 }
 
-void view(ViewState_typeDef *dt) {
-    if (dt == NULL) {
-        return;
-    }
-
+void view() {
     uistate = getState();
 
-    switch (dt->event) {
-        case ROTATION: {
-            LCD_Fill(0, 0, LCD_W, LCD_H, BLACK);
-            setRotation(!uistate.rotation);
-            dt->initLock = 0;
-            dt->event = NONE;
-            break;
-        }
-        default: {
-            // Nothing
-            break;
-        }
+    if (uistate.rotationLock == false) {
+        lcd_rotation(uistate.rotation);
+        setRotationLock(true);
     }
 
-    if (dt->refreshLock != 1) {
-        if (dt->initLock != 1) {
-            displayInit(dt->screen);
-            dt->initLock = 1;
-        }
-
-        screens(dt->screen);
-
-        dt->refreshLock = 1;
+    if (uistate.initLock == false) {
+        displayInit(uistate.screenIndex);
+        setInitLock(true);
     }
+
+    screens(uistate.screenIndex);
 }

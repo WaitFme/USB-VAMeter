@@ -9,13 +9,6 @@ typedef enum {
     REFRESH,
 } ViewEvent_typeDef;
 
-typedef struct {
-    ViewEvent_typeDef event;
-    uint8_t refreshLock;
-    uint8_t initLock;
-    uint8_t screen;
-} ViewState_typeDef;
-
-void view(ViewState_typeDef *dt);
+void view();
 
 #endif  // !VIEW_H

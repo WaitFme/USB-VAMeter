@@ -9,34 +9,15 @@
 #include "view.h"
 #include "controller.h"
 
-#define REFRESH_TICK_DATA    2
-#define REFRESH_TICK_DISPLAY 50
-
-ModelState_typeDef dataRefresh = {
-    .event = ME_NONE,
-    .initLock = 1,
-    .refreshLock = 0,
-};
-
-ViewState_typeDef display = {
-    .event = NONE,
-    .initLock = 0,
-    .refreshLock = 0,
-};
-
-KeyConfig_typeDef kct = {
-    .cStatus = KS_RELEASE,
-    .lStatus = KS_RELEASE,
-    .keyCount = 0,
-};
+#define REFRESH_TICK_KEY     10
+#define REFRESH_TICK_DATA    100
+#define REFRESH_TICK_DISPLAY 500
 
 MainState_TypeDef mainState = {
-    .ViewRefreshLock = 1,
-    .ModelRefreshLock = 1,
+    .ViewRefreshLock = true,
+    .ModelRefreshLock = true,
+    .KeyScanLock = true,
 };
-
-// uint8_t ct_lock = 0;
-// uint8_t rt_lock = 0;
 
 void initial() {
     SYSCTRL_Configuration();
@@ -60,42 +41,22 @@ int main() {
     initial();
 
     while (1) {
-        controller(&display, &kct);
+        controller();
 
-        // switch (kct.cStatus) {
-        //     case KS_RELEASE:
-        //         ct_lock = 0;
-        //         rt_lock = 0;
-        //         break;
-        //     case KS_PRESS: {
-        //         if (!ct_lock) {
-        //             display.screen++;
-        //             display.initLock = 0;
-        //             if (display.screen >= 2) {
-        //                 display.screen = 0;
-        //             }
-        //             ct_lock = 1;
-        //         }
-        //     } break;
-        //     case KS_LONGPRESS: {
-        //         if (!rt_lock) {
-        //             display.event = ROTATION;
-        //             rt_lock = 1;
-        //         }
-        //     } break;
-        //     default:
-        //         break;
-        // }
+        if (mainState.KeyScanLock == false) {
+            keyStatusScan();
+            mainState.KeyScanLock = true;
+        }
+
         if (mainState.ModelRefreshLock == false) {
-            model(&dataRefresh);
+            model();
             mainState.ModelRefreshLock = true;
         }
 
         if (mainState.ViewRefreshLock == false) {
-            view(&display);
+            view();
             mainState.ViewRefreshLock = true;
         }
-
     }
 }
 
@@ -107,23 +68,19 @@ void BTIM1_IRQHandler() {
 
         timecount++;
 
-        if (timecount % KEY_DEBOUNCE_TIME == 0) {
-            keyStatusScan(&kct);
+        if (timecount % REFRESH_TICK_KEY == 0) {
+            mainState.KeyScanLock = false;
         }
 
         if (timecount % REFRESH_TICK_DATA == 0) {
-            dataRefresh.refreshLock = 0;
-
-            mainState.ModelRefreshLock = 0;
+            mainState.ModelRefreshLock = false;
         }
 
         if (timecount % REFRESH_TICK_DISPLAY == 0) {
-            display.refreshLock = 0;
-
-            mainState.ViewRefreshLock = 0;
+            mainState.ViewRefreshLock = false;
         }
 
-        if (timecount >= 100) {
+        if (timecount >= 1000) {
             timecount = 0;
         }
     }

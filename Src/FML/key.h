@@ -5,7 +5,7 @@
 
 #define KEY_PIN_0             GPIO_PIN_0
 
-#define KEY_DEBOUNCE_TIME     1    // 消抖时间
+#define KEY_DEBOUNCE_TIME     10    // 消抖时间
 #define KEY_LONG_PRESS_TIME   500  // 长按判定时间
 #define KEY_QUICK_CLICK_TIME  100  // 连按时间间隔
 #define KEY_DOUBLE_CLICK_TIME 200  // 双击判定时间

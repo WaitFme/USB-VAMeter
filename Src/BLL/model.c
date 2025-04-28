@@ -19,16 +19,19 @@ extern uint16_t ntcAdcBuffer[ADC_SAMPLE_SIZE];
 
 uint16_t voltageBuffer, currentBuffer, referenceBuffer, ntcBuffer, offsetBuffer;
 
-short direction = -1; // 电流方向 <0：正方向；>0：反方向
-uint32_t voltage = 0; // 电压值(mV)
-uint32_t current = 0; // 电流值(mA)
-uint32_t power = 0; // 功率值(mW)
-double electricity = 0.0; // 电能(mWh)
-uint32_t temperature = 0; // 温度值摄氏度
-uint32_t chargingtime = 0; // 充电时间
+short direction = -1;       // 电流方向 <0：正方向；>0：反方向
+uint32_t voltage = 0;       // 电压值(mV)
+uint32_t current = 0;       // 电流值(mA)
+uint32_t power = 0;         // 功率值(mW)
+double electricity = 0.0;   // 电能(mWh)
+uint32_t temperature = 0;   // 温度值摄氏度
+uint32_t chargingtime = 0;  // 充电时间
 
 viewState vstate = {
     .rotation = 0,
+    .initLock = 0,
+    .screenIndex = 0,
+    .rotationLock = true,
 };
 
 void cleaning() {
@@ -77,54 +80,63 @@ uint32_t currentCalculate(uint16_t cBuffer, uint16_t oBuffer) {
     }
 }
 
-void model(ModelState_typeDef *state) {
-    if (state == NULL) {
-        return;
+void modelInit() {
+
+}
+
+void model() {
+    // 获取数据
+    getAdcValue();
+
+    // 数据简单滤波
+    cleaning();
+
+    // 计算数据
+    voltage = voltCalculate(voltageBuffer);
+    current = currentCalculate(currentBuffer, offsetBuffer);
+    power = voltage * current / 1000;
+    direction = currentDirection(currentBuffer, offsetBuffer);
+    temperature = GetNTCTable_Temp(ntcBuffer);
+
+    if (current > 5) {
+        timer2Enable(ENABLE);
+    } else {
+        timer2Enable(DISABLE);
+        chargingtime = 0;
+        electricity = 0;
     }
 
-    if (state->refreshLock != 1) {
-        // 获取数据
-        getAdcValue();
-
-        // 数据简单滤波
-        cleaning();
-
-        // 计算数据
-        voltage = voltCalculate(voltageBuffer);
-        current = currentCalculate(currentBuffer, offsetBuffer);
-        power = voltage * current / 1000;
-        direction = currentDirection(currentBuffer, offsetBuffer);
-        temperature = GetNTCTable_Temp(ntcBuffer);
-
-        if (current > 5) {
-            timer2Enable(ENABLE);
-        } else {
-            timer2Enable(DISABLE);
-            chargingtime = 0;
-            electricity = 0;
-        }
-
-        vstate.voltage = (double)voltage / 1000;
-        vstate.current = (double)current / 1000;
-        vstate.power = (double)power / 1000;
-        vstate.temperature = (double)temperature / 10;
-        vstate.currDirection = direction;
-
-        state->refreshLock = 1;
-    }
+    vstate.voltage = (double)voltage / 1000;
+    vstate.current = (double)current / 1000;
+    vstate.power = (double)power / 1000;
+    vstate.temperature = (double)temperature / 10;
+    vstate.currDirection = direction;
 }
 
 viewState getState() {
     return vstate;
 }
 
-ModelEvent_typeDef getEvent() {
-    return ME_ROTATION;
+void setInitLock(bool value) {
+    vstate.initLock = value;
 }
 
-void setRotation(uint8_t newValue) {
-    vstate.rotation = newValue;
-    lcd_rotation(vstate.rotation);
+void setRotationLock(bool value) {
+    vstate.rotationLock = value;
+}
+
+void changeScreen() {
+    vstate.initLock = 0;
+    vstate.screenIndex++;
+    if (vstate.screenIndex >= 2) {
+        vstate.screenIndex = 0;
+    }
+}
+
+void changeRotation() {
+    vstate.rotation = !vstate.rotation;
+    vstate.initLock = 0;
+    vstate.rotationLock = 0;
 }
 
 // 1hz 中断

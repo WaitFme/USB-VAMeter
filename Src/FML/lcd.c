@@ -38,7 +38,7 @@ void LCD_Fill_All(uint16_t color) {
 }
 
 void lcd_rotation(uint8_t rotation) {
-    // LCD_Fill(0, 0, LCD_W - 1, LCD_H - 1, BLACK);
+    LCD_Fill(0, 0, LCD_W - 1, LCD_H - 1, BLACK);
 
     ST7735S_WriteCMD(0x36);
     if (rotation) {
@@ -336,7 +336,7 @@ void LCD_ShowCharCustom(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16
     uint16_t typefaceNum = (sizex / 8 + ((sizex % 8) ? 1 : 0)) * sizey;
     num = num - ' ';
 
-    if (!mode) {
+    if (mode) {
         ST7735S_Address_Set(x, y, x + sizex - 1, y + sizey - 1);
     }
 

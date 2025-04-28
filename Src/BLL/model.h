@@ -23,10 +23,16 @@ typedef struct {
     uint32_t chargingtime;
     short currDirection;
     uint8_t rotation;
+    bool rotationLock;
+    bool initLock;
+    uint8_t screenIndex;
 } viewState;
 
-void model(ModelState_typeDef *state);
+void model();
 viewState getState();
-void setRotation(uint8_t newValue);
+void setRotationLock(bool value);
+void setInitLock(bool value);
+void changeScreen();
+void changeRotation();
 
 #endif // !MODEL_H

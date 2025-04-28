@@ -4,29 +4,34 @@
 #include "key.h"
 #include "lcd.h"
 
-uint8_t ct_lock = 0;
-uint8_t rt_lock = 0;
+uint8_t ct_lock = false;
+uint8_t rt_lock = false;
 
-void controller(Display_typeDef *display, KeyConfig_typeDef *kct) {
-    switch (kct->cStatus) {
-        case KS_RELEASE:
-            ct_lock = 0;
-            rt_lock = 0;
-            break;
+KeyConfig_typeDef kc = {
+    .cStatus = KS_RELEASE,
+    .lStatus = KS_RELEASE,
+    .keyCount = 0,
+};
+
+void controllerInit() {
+}
+
+void controller() {
+    switch (kc.cStatus) {
+        case KS_RELEASE: {
+            ct_lock = false;
+            rt_lock = false;
+        } break;
         case KS_PRESS: {
             if (!ct_lock) {
-                display->screen++;
-                display->initLock = 0;
-                if (display->screen >= 2) {
-                    display->screen = 0;
-                }
-                ct_lock = 1;
+                changeScreen();
+                ct_lock = true;
             }
         } break;
         case KS_LONGPRESS: {
             if (!rt_lock) {
-                display->event = ROTATION;
-                rt_lock = 1;
+                changeRotation();
+                rt_lock = true;
             }
         } break;
         default:
@@ -34,64 +39,46 @@ void controller(Display_typeDef *display, KeyConfig_typeDef *kct) {
     }
 }
 
-// void controller(ControllerEvent_typeDef ce) {
-//     if (ce == ROTATIONX) {
-//         setRotationss(0);
-//     }
-// }
-
-// void setRotationss(uint8_t value) {
-//     lcd_rotation(value);
-// }
-
-void controllerInit() {
-
-}
-
-void controller() {
-
-}
-
-void keyStatusScan(KeyConfig_typeDef *kc) {
-    switch (kc->cStatus) {
+void keyStatusScan() {
+    switch (kc.cStatus) {
         case KS_RELEASE: {
             if (KEY0 == 0) {
-                kc->cStatus = KS_PRESS_SHAKE;
-                kc->keyCount = 0;
+                kc.cStatus = KS_PRESS_SHAKE;
+                kc.keyCount = 0;
             }
             break;
         }
         case KS_PRESS_SHAKE: {
-            kc->keyCount++;
+            kc.keyCount++;
             if (KEY0 == 1) {
-                kc->cStatus = KS_RELEASE;
-            } else if (kc->keyCount == 3) {
-                kc->cStatus = KS_WAIT_CHECK;
-                kc->keyCount = 0;
+                kc.cStatus = KS_RELEASE;
+            } else if (kc.keyCount == 3) {
+                kc.cStatus = KS_WAIT_CHECK;
+                kc.keyCount = 0;
             }
             break;
         }
         case KS_WAIT_CHECK: {
-            kc->keyCount++;
+            kc.keyCount++;
 
-            if (kc->keyCount >= 50) {
-                kc->cStatus = KS_LONGPRESS;
-                kc->keyCount = 0;
+            if (kc.keyCount >= 50) {
+                kc.cStatus = KS_LONGPRESS;
+                kc.keyCount = 0;
             } else if (KEY0 == 1) {
-                kc->cStatus = KS_PRESS;
-                kc->keyCount = 0;
+                kc.cStatus = KS_PRESS;
+                kc.keyCount = 0;
             }
             break;
         }
         case KS_PRESS: {
             if (KEY0 == 1) {
-                kc->cStatus = KS_RELEASE_SHAKE;
+                kc.cStatus = KS_RELEASE_SHAKE;
             }
             break;
         }
         case KS_LONGPRESS: {
             if (KEY0 == 1) {
-                kc->cStatus = KS_RELEASE_SHAKE;
+                kc.cStatus = KS_RELEASE_SHAKE;
             }
             break;
         }
@@ -100,11 +87,11 @@ void keyStatusScan(KeyConfig_typeDef *kc) {
             break;
         }
         case KS_RELEASE_SHAKE: {
-            kc->keyCount++;
+            kc.keyCount++;
             if (KEY0 == 0) {
-                kc->cStatus = KS_WAIT_CHECK;
-            } else if (kc->keyCount == 3) {
-                kc->cStatus = KS_RELEASE;
+                kc.cStatus = KS_WAIT_CHECK;
+            } else if (kc.keyCount == 3) {
+                kc.cStatus = KS_RELEASE;
             }
             break;
         }
@@ -113,7 +100,7 @@ void keyStatusScan(KeyConfig_typeDef *kc) {
             break;
         }
     }
-    if (kc->cStatus != kc->lStatus) {
-        kc->lStatus = kc->cStatus;
+    if (kc.cStatus != kc.lStatus) {
+        kc.lStatus = kc.cStatus;
     }
 }
