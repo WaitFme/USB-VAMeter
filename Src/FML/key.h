@@ -14,5 +14,6 @@
 #define KEY0                  GPIO_ReadPin(CW_GPIOB, GPIO_PIN_0)
 
 void Key_Init();
+uint8_t readButton();
 
 #endif  // !KEY_H

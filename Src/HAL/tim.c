@@ -9,7 +9,7 @@ void BTIM1_init() {
 
     BTIM_TimeBaseInitTypeDef tim1 = {
         .BTIM_Mode = BTIM_MODE_TIMER,
-        .BTIM_Period = 100 - 1,
+        .BTIM_Period = 500 - 1, // 100
         .BTIM_Prescaler = 480 - 1,
     };
     BTIM_TimeBaseInit(CW_BTIM1, &tim1);

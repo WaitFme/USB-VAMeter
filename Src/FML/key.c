@@ -12,6 +12,10 @@ void Key_Init() {
     GPIO_Init(CW_GPIOB, &gpio);
 }
 
+uint8_t readButton() {
+    return GPIO_ReadPin(CW_GPIOB, GPIO_PIN_0);
+}
+
 /* void GPIOB_IRQHandler() {
     if (CW_GPIOB->ISR & GPIO_PIN_0) {
         CW_GPIOB->ICR &= ~GPIO_PIN_0;

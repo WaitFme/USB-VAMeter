@@ -8,10 +8,11 @@
 #include "model.h"
 #include "view.h"
 #include "controller.h"
+#include "multi_button.h"
 
-#define REFRESH_TICK_KEY     10
-#define REFRESH_TICK_DATA    100
-#define REFRESH_TICK_DISPLAY 500
+#define REFRESH_TICK_KEY     1
+#define REFRESH_TICK_DATA    20
+#define REFRESH_TICK_DISPLAY 100
 
 MainState_TypeDef mainState = {
     .ViewRefreshLock = true,
@@ -35,16 +36,18 @@ void initial() {
     LCD_Init();
 
     Key_Init();
+
+    controllerInit();
 }
 
 int main() {
     initial();
 
     while (1) {
-        controller();
+        // controller();
 
         if (mainState.KeyScanLock == false) {
-            keyStatusScan();
+            // keyStatusScan();
             mainState.KeyScanLock = true;
         }
 
@@ -67,8 +70,9 @@ void BTIM1_IRQHandler() {
         BTIM_ClearITPendingBit(CW_BTIM1, BTIM_IT_UPDATE);
 
         timecount++;
-
+            button_ticks();
         if (timecount % REFRESH_TICK_KEY == 0) {
+            // button_ticks();
             mainState.KeyScanLock = false;
         }
 

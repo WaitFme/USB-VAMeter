@@ -26,6 +26,7 @@ typedef struct {
     uint16_t keyCount;
 } KeyConfig_typeDef;
 
+void controllerInit();
 void controller();
 void keyStatusScan();
 

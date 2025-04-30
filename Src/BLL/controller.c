@@ -3,9 +3,12 @@
 #include "model.h"
 #include "key.h"
 #include "lcd.h"
+#include "multi_button.h"
 
 uint8_t ct_lock = false;
 uint8_t rt_lock = false;
+
+struct Button button1;
 
 KeyConfig_typeDef kc = {
     .cStatus = KS_RELEASE,
@@ -13,7 +16,23 @@ KeyConfig_typeDef kc = {
     .keyCount = 0,
 };
 
+void Callback_SINGLE_CLICK_Handler(void* btn) {
+    changeScreen();
+}
+
+void Callback_DOUBLE_Click_Handler(void* btn) {
+}
+
+void Callback_LONG_PRESS_START_Handler(void* btn) {
+    changeRotation();
+}
+
 void controllerInit() {
+    button_init(&button1, readButton, 0, 0);
+    button_attach(&button1, SINGLE_CLICK, Callback_SINGLE_CLICK_Handler);
+    button_attach(&button1, DOUBLE_CLICK, Callback_DOUBLE_Click_Handler);
+    button_attach(&button1, LONG_PRESS_START, Callback_LONG_PRESS_START_Handler);
+    button_start(&button1);
 }
 
 void controller() {
