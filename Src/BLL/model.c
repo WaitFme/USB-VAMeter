@@ -81,7 +81,6 @@ uint32_t currentCalculate(uint16_t cBuffer, uint16_t oBuffer) {
 }
 
 void modelInit() {
-
 }
 
 void model() {
@@ -111,6 +110,12 @@ void model() {
     vstate.power = (double)power / 1000;
     vstate.temperature = (double)temperature / 10;
     vstate.currDirection = direction;
+
+    if (direction != -1) {
+        vstate.directionChar = vstate.rotation ^ vstate.currDirection ? '>' : '<';
+    } else {
+        vstate.directionChar = ' ';
+    }
 }
 
 viewState getState() {
@@ -146,6 +151,9 @@ void BTIM2_IRQHandler() {
         chargingtime++;
         electricity += (double)power / 1000;
         vstate.chargingtime = chargingtime;
+        vstate.chargingSecond = chargingtime % 60;
+        vstate.chargingMinute = chargingtime % 3600 / 60;
+        vstate.chargingHour = chargingtime / 3600;
         vstate.electricity = electricity / 3600;
     }
 }

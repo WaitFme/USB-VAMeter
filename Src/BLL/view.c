@@ -15,13 +15,13 @@ void displayInit(uint8_t index) {
         LCD_ShowString(8, 28, "I", WHITE, BLACK, 24, 0);
         LCD_ShowString(8, 54, "P", WHITE, BLACK, 24, 0);
 
-        LCD_ShowString(35, 2, "0.000", WHITE, BLACK, 32, 0);
-        LCD_ShowString(35, 28, "0.000", WHITE, BLACK, 32, 0);
-        LCD_ShowString(35, 54, "0.000", WHITE, BLACK, 32, 0);
+        LCD_ShowSmartFloatBasic(35, 2, 0, 5, WHITE, BLACK, 16, 28, 0);
+        LCD_ShowSmartFloatBasic(35, 28, 0, 5, WHITE, BLACK, 16, 28, 0);
+        LCD_ShowSmartFloatBasic(35, 54, 0, 5, WHITE, BLACK, 16, 28, 0);
 
-        LCD_ShowCharCustom(121, 2, 'V', MY_YELLOW, BLACK, 16, 28, 0);
-        LCD_ShowCharCustom(121, 28, 'A', MY_GREEN, BLACK, 16, 28, 0);
-        LCD_ShowCharCustom(121, 54, 'W', MY_BLUE, BLACK, 16, 28, 0);
+        LCD_ShowCharBasic(121, 2, 'V', MY_YELLOW, BLACK, 16, 28, 0);
+        LCD_ShowCharBasic(121, 28, 'A', MY_GREEN, BLACK, 16, 28, 0);
+        LCD_ShowCharBasic(121, 54, 'W', MY_BLUE, BLACK, 16, 28, 0);
     } else if (index == 1) {
         LCD_ShowChinese(5, 5, 0, 12, BLUE, BLACK, 0);
         LCD_ShowChinese(17, 5, 1, 12, BLUE, BLACK, 0);
@@ -56,36 +56,23 @@ void displayInit(uint8_t index) {
         LCD_ShowString(5, 60, "0.00", RED, BLACK, 16, 0);
         LCD_ShowString(41, 58, "o", RED, BLACK, 12, 0);
         LCD_ShowString(48, 60, "C", RED, BLACK, 16, 0);
-    } else {
-        // LCD_Fill(27, 2, 133, 78, MY_YELLOW);
-
-        // LCD_Fill(56, 2, 80, 78, MY_GREEN);
-        // LCD_Fill(80, 2, 133, 52, MY_GREEN);
-
-        // LCD_Fill(85, 2, 109, 78, MY_BLUE);
-        // LCD_Fill(85, 2, 133, 27, MY_BLUE);
     }
 }
 
 void screens(uint8_t index) {
-    uint8_t x = uistate.rotation ^ uistate.currDirection;
     if (index == 0) {
-        LCD_ShowSmartFloatEx(35, 2, uistate.voltage, 5, WHITE, BLACK, 16, 28, 1);
-        LCD_ShowSmartFloatEx(35, 28, uistate.current, 5, WHITE, BLACK, 16, 28, 1);
-        LCD_ShowSmartFloatEx(35, 54, uistate.power, 5, WHITE, BLACK, 16, 28, 1);
-        if (uistate.currDirection != -1) {
-            LCD_ShowString(150, 34, x ? ">" : "<", MY_GREEN, BLACK, 12, 0);
-        }
+        LCD_ShowSmartFloatBasic(35, 2, uistate.voltage, 5, WHITE, BLACK, 16, 28, 1);
+        LCD_ShowSmartFloatBasic(35, 28, uistate.current, 5, WHITE, BLACK, 16, 28, 1);
+        LCD_ShowSmartFloatBasic(35, 54, uistate.power, 5, WHITE, BLACK, 16, 28, 1);
+        LCD_ShowChar(150, 34, uistate.directionChar, MY_GREEN, BLACK, 12, 1);
     } else if (index == 1) {
         LCD_ShowSmartFloat(97, 2, uistate.voltage, 5, WHITE, ORANGE, 16, 1);
         LCD_ShowSmartFloat(97, 22, uistate.current, 5, WHITE, SGREEN, 16, 1);
         LCD_ShowSmartFloat(97, 42, uistate.power, 5, WHITE, GRAYBLUE, 16, 1);
-        if (uistate.currDirection != -1) {
-            LCD_ShowString(2, 34, x ? ">" : "<", MY_GREEN, BLACK, 12, 0);
-        }
+        LCD_ShowChar(2, 34, uistate.directionChar, MY_GREEN, BLACK, 12, 1);
         LCD_ShowSmartFloat(5, 60, uistate.temperature, 5, RED, BLACK, 16, 1);
         LCD_ShowSmartFloat(97, 62, uistate.electricity, 4, WHITE, BRRED, 16, 1);
-        LCD_ShowStringFormat(5, 22, BLUE, BLACK, 12, 1, "%02d:%02d:%02d", uistate.chargingtime / 3600, uistate.chargingtime % 3600 / 60, uistate.chargingtime % 60);
+        LCD_ShowStringFormat(5, 22, BLUE, BLACK, 12, 1, "%02d:%02d:%02d", uistate.chargingHour, uistate.chargingMinute, uistate.chargingSecond);
     }
 }
 
@@ -93,7 +80,7 @@ void view() {
     uistate = getState();
 
     if (uistate.rotationLock == false) {
-        lcd_rotation(uistate.rotation);
+        LCD_Rotation(uistate.rotation);
         setRotationLock(true);
     }
 

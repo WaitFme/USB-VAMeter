@@ -37,7 +37,7 @@
 
 void LCD_Init();
 void LCD_Clear();
-void lcd_rotation(uint8_t rotation);
+void LCD_Rotation(uint8_t rotation);
 void LCD_Fill_All(uint16_t color);
 void LCD_Fill(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16_t color);
 void LCD_DrawPoint(uint16_t x, uint16_t y, uint16_t color);
@@ -47,13 +47,13 @@ void LCD_DrawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint1
 void LCD_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
 void LCD_ShowImage(uint16_t x_start, uint16_t y_start, uint16_t width, uint16_t height, uint16_t *pic);
 void LCD_ShowChinese(uint16_t x, uint16_t y, uint16_t index, uint8_t size, uint16_t pointcolor, uint16_t backcolor, uint8_t mode);
+void LCD_ShowCharBasic(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode);
 void LCD_ShowChar(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode);
-void LCD_ShowCharCustom(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode);
 void LCD_ShowString(uint16_t x, uint16_t y, const char *data, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode);
 void LCD_ShowStringFormat(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode, const char *fmt, ...);
 void LCD_ShowIntNum(uint16_t x, uint16_t y, uint16_t num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode);
 void LCD_ShowFloatNum(uint16_t x, uint16_t y, float num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode);
+void LCD_ShowSmartFloatBasic(uint16_t x, uint16_t y, double num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode);
 void LCD_ShowSmartFloat(uint16_t x, uint16_t y, double num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode);
-void LCD_ShowSmartFloatEx(uint16_t x, uint16_t y, double num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode);
 
 #endif

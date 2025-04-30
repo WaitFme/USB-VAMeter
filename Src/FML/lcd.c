@@ -54,7 +54,7 @@ void LCD_Fill_All(uint16_t color) {
     LCD_Fill(0, 0, LCD_W - 1, LCD_H - 1, color);
 }
 
-void lcd_rotation(uint8_t rotation) {
+void LCD_Rotation(uint8_t rotation) {
     LCD_Fill(0, 0, LCD_W - 1, LCD_H - 1, BLACK);
 
     ST7735S_WriteCMD(0x36);
@@ -287,65 +287,11 @@ void LCD_ShowChinese(uint16_t x, uint16_t y, uint16_t index, uint8_t size, uint1
  * @param num	字符
  * @param fc	字符颜色
  * @param bc	背景颜色
+ * @param sizex	字符宽度
  * @param sizey	字符大小 -> 12, 16, 24, 32
  * @param mode	显示模式 -> 1:显示背景颜色; 0:不显示背景颜色
  */
-void LCD_ShowChar(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode) {
-    uint8_t temp, sizex, m = 0;
-    uint16_t TypefaceNum;
-    uint16_t x0 = x;
-    sizex = sizey / 2;
-    TypefaceNum = (sizex / 8 + ((sizex % 8) ? 1 : 0)) * sizey;
-    num = num - ' ';
-
-    ST7735S_Address_Set(x, y, x + sizex - 1, y + sizey - 1);
-
-    for (uint16_t i = 0; i < TypefaceNum; i++) {
-        if (sizey == 12) {
-            temp = ascii_1206[num][i];
-        } else if (sizey == 16) {
-            temp = ascii_1608[num][i];
-        } else if (sizey == 24) {
-            // temp = ascii_2412[num][i];
-            temp = ascii_2412_jetbra_mono[num][i];
-        } else if (sizey == 32) {
-            temp = ascii_3216[num][i];
-        } else {
-            return;
-        }
-
-        for (uint16_t t = 0; t < 8; t++) {
-            if (mode) {
-                if (temp & (0x01 << t)) {
-                    ST7735S_WriteData_16Bit(fc);
-                } else {
-                    ST7735S_WriteData_16Bit(bc);
-                }
-
-                m++;
-
-                if (m % sizex == 0) {
-                    m = 0;
-                    break;
-                }
-            } else {
-                if (temp & (0x01 << t)) {
-                    LCD_DrawPoint(x, y, fc);
-                }
-
-                x++;
-
-                if ((x - x0) == sizex) {
-                    x = x0;
-                    y++;
-                    break;
-                }
-            }
-        }
-    }
-}
-
-void LCD_ShowCharCustom(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode) {
+void LCD_ShowCharBasic(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode) {
     uint8_t temp;
     uint8_t m = 0;
 
@@ -366,8 +312,9 @@ void LCD_ShowCharCustom(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16
         } else if (sizey == 24) {
             temp = ascii_2412_jetbra_mono[num][i];
         } else if (sizey == 28) {
-            // temp = ascii_3216[num][i];
             temp = ascii_2816_helvetica[index][i];
+        } else if (sizey == 32) {
+            temp = ascii_3216[num][i];
         } else {
             return;
         }
@@ -401,6 +348,21 @@ void LCD_ShowCharCustom(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16
             }
         }
     }
+}
+
+/**
+ * @brief 		显示单字符
+ *
+ * @param x		起始x轴
+ * @param y		起始y轴
+ * @param num	字符
+ * @param fc	字符颜色
+ * @param bc	背景颜色
+ * @param sizey	字符大小 -> 12, 16, 24, 32
+ * @param mode	显示模式 -> 1:显示背景颜色; 0:不显示背景颜色
+ */
+void LCD_ShowChar(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode) {
+    LCD_ShowCharBasic(x, y, num, fc, bc, sizey / 2, sizey, mode);
 }
 
 /**
@@ -511,8 +473,7 @@ void LCD_ShowFloatNum(uint16_t x, uint16_t y, float num, uint8_t len, uint16_t f
  * @param bColor 背景颜色
  * @param fontSize 字体大小
  */
-void LCD_ShowSmartFloat(uint16_t x, uint16_t y, double num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode) {
-    uint8_t sizex = sizey / 2;
+void LCD_ShowSmartFloatBasic(uint16_t x, uint16_t y, double num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode) {
     char buffer[16] = {0};
     uint8_t decimal_places = 0;
     bool show_decimal = true;
@@ -541,13 +502,13 @@ void LCD_ShowSmartFloat(uint16_t x, uint16_t y, double num, uint8_t len, uint16_
         snprintf(buffer, sizeof(buffer), format_str, num);
 
         // 移除多余的0（如1.230→1.23）
-        for (int i = strlen(buffer) - 1; i >= 0; --i) {
-            if (buffer[i] == '0' && buffer[i - 1] != '.') {
-                buffer[i] = '\0';
-            } else {
-                break;
-            }
-        }
+        // for (int i = strlen(buffer) - 1; i >= 0; --i) {
+        //     if (buffer[i] == '0' && buffer[i - 1] != '.') {
+        //         buffer[i] = '\0';
+        //     } else {
+        //         break;
+        //     }
+        // }
 
         // 补前导0（如.5→0.5）
         if (buffer[0] == '.') {
@@ -559,11 +520,12 @@ void LCD_ShowSmartFloat(uint16_t x, uint16_t y, double num, uint8_t len, uint16_
     // 显示字符（自动对齐）
     for (uint8_t i = 0, pos = 0; i < strlen(buffer) && pos < len; ++i) {
         if (buffer[i] == '.') {
-            LCD_ShowChar(x + pos * sizex, y, '.', fc, bc, sizey, 1);
+            LCD_ShowCharBasic(x + pos * sizex, y, '.', fc, bc, sizex, sizey, mode);
             pos++;
             continue;
         }
-        LCD_ShowChar(x + pos * sizex, y, buffer[i], fc, bc, sizey, 1);
+        LCD_ShowCharBasic(x + pos * sizex, y, buffer[i], fc, bc, sizex, sizey, mode);
+        LCD_ShowCharBasic(x + pos * sizex, y, buffer[i], fc, bc, sizex, sizey, mode);
         pos++;
     }
 }
@@ -578,60 +540,7 @@ void LCD_ShowSmartFloat(uint16_t x, uint16_t y, double num, uint8_t len, uint16_
  * @param bColor 背景颜色
  * @param fontSize 字体大小
  */
-void LCD_ShowSmartFloatEx(uint16_t x, uint16_t y, double num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode) {
-    char buffer[16] = {0};
-    uint8_t decimal_places = 0;
-    bool show_decimal = true;
-
-    // 根据数值范围确定显示格式
-    if (num < 10.0) {
-        decimal_places = len - 2;  // 如length=5→3位小数
-    } else if (num < 100.0) {
-        decimal_places = len - 3;  // 如length=5→2位小数
-    } else if (num < 1000.0) {
-        decimal_places = len - 4;  // 如length=5→1位小数
-    } else {
-        show_decimal = false;  // 超过1000转为整数模式
-    }
-
-    // 特殊处理纯整数模式
-    if (!show_decimal) {
-        snprintf(buffer, sizeof(buffer), "%0*d", len, (int)num);
-    } else {
-        // 处理带小数的情况
-        // 计算需要的格式字符串（如"%.3f"）
-        char format_str[8];
-        snprintf(format_str, sizeof(format_str), "%%.%df", decimal_places);
-
-        // 先格式化为标准小数
-        snprintf(buffer, sizeof(buffer), format_str, num);
-
-        // 移除多余的0（如1.230→1.23）
-        for (int i = strlen(buffer) - 1; i >= 0; --i) {
-            if (buffer[i] == '0' && buffer[i - 1] != '.') {
-                buffer[i] = '\0';
-            } else {
-                break;
-            }
-        }
-
-        // 补前导0（如.5→0.5）
-        if (buffer[0] == '.') {
-            memmove(buffer + 1, buffer, strlen(buffer) + 1);
-            buffer[0] = '0';
-        }
-    }
-
-    // 显示字符（自动对齐）
-    for (uint8_t i = 0, pos = 0; i < strlen(buffer) && pos < len; ++i) {
-        if (buffer[i] == '.') {
-            LCD_ShowCharCustom(x + pos * sizex, y, '.', fc, bc, sizex, sizey, mode);
-            pos++;
-            continue;
-        }
-        LCD_ShowCharCustom(x + pos * sizex, y, buffer[i], fc, bc, sizex, sizey, mode);
-        LCD_ShowCharCustom(x + pos * sizex, y, buffer[i], fc, bc, sizex, sizey, mode);
-        pos++;
-    }
+void LCD_ShowSmartFloat(uint16_t x, uint16_t y, double num, uint8_t len, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode) {
+    LCD_ShowSmartFloatBasic(x, y, num, len, fc, bc, sizey / 2, sizey, mode);
 }
 

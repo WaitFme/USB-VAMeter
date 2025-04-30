@@ -11,8 +11,8 @@
 #include "multi_button.h"
 
 #define REFRESH_TICK_KEY     1
-#define REFRESH_TICK_DATA    20
-#define REFRESH_TICK_DISPLAY 100
+#define REFRESH_TICK_DATA    5
+#define REFRESH_TICK_DISPLAY 25
 
 MainState_TypeDef mainState = {
     .ViewRefreshLock = true,

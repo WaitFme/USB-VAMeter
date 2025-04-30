@@ -26,6 +26,10 @@ typedef struct {
     bool rotationLock;
     bool initLock;
     uint8_t screenIndex;
+    char directionChar;
+    uint16_t chargingHour;
+    uint8_t chargingMinute;
+    uint8_t chargingSecond;
 } viewState;
 
 void model();
