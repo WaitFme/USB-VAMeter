@@ -12,9 +12,26 @@
 #include "lcdfont.h"
 #include "math.h"
 #include "tools.h"
-#include "jma.h"
 #include <string.h>
 #include <stdarg.h>
+
+const uint8_t charToIndex[128] = {
+    [' '] = 0,   // 空格 -> 索引 0
+    ['.'] = 1,   // '.' -> 索引 1
+    ['0'] = 2,   // '0' -> 索引 2
+    ['1'] = 3,   // '1' -> 索引 3
+    ['2'] = 4,
+    ['3'] = 5,
+    ['4'] = 6,
+    ['5'] = 7,
+    ['6'] = 8,
+    ['7'] = 9,
+    ['8'] = 10,
+    ['9'] = 11,
+    ['A'] = 12,  // 'A' -> 索引 33
+    ['V'] = 13,  // 'V' -> 索引 54
+    ['W'] = 14,  // 'W' -> 索引 55
+};
 
 /**
  * @brief 初始化LCD
@@ -334,6 +351,7 @@ void LCD_ShowCharCustom(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16
 
     uint16_t x0 = x;
     uint16_t typefaceNum = (sizex / 8 + ((sizex % 8) ? 1 : 0)) * sizey;
+    uint16_t index = charToIndex[num];
     num = num - ' ';
 
     if (mode) {
@@ -348,7 +366,8 @@ void LCD_ShowCharCustom(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16
         } else if (sizey == 24) {
             temp = ascii_2412_jetbra_mono[num][i];
         } else if (sizey == 28) {
-            temp = ascii_3216[num][i];
+            // temp = ascii_3216[num][i];
+            temp = ascii_2816_helvetica[index][i];
         } else {
             return;
         }
