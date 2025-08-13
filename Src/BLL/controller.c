@@ -1,27 +1,23 @@
+#include "multi_button.h"
 #include "controller.h"
-#include "view.h"
 #include "model.h"
+#include "view.h"
 #include "key.h"
 #include "lcd.h"
-#include "multi_button.h"
 
-uint8_t ct_lock = false;
-uint8_t rt_lock = false;
+#define REFRESH_TICK_KEY     1
+#define REFRESH_TICK_DATA    5
+#define REFRESH_TICK_DISPLAY 25
+
+ControlState_TypeDef ControlState;
 
 struct Button button1;
-
-KeyConfig_typeDef kc = {
-    .cStatus = KS_RELEASE,
-    .lStatus = KS_RELEASE,
-    .keyCount = 0,
-};
 
 void Callback_SINGLE_CLICK_Handler(void* btn) {
     changeScreen();
 }
 
-void Callback_DOUBLE_Click_Handler(void* btn) {
-}
+// void Callback_DOUBLE_Click_Handler(void* btn) { }
 
 void Callback_LONG_PRESS_START_Handler(void* btn) {
     changeRotation();
@@ -30,96 +26,56 @@ void Callback_LONG_PRESS_START_Handler(void* btn) {
 void controllerInit() {
     button_init(&button1, readButton, 0, 0);
     button_attach(&button1, SINGLE_CLICK, Callback_SINGLE_CLICK_Handler);
-    button_attach(&button1, DOUBLE_CLICK, Callback_DOUBLE_Click_Handler);
+    // button_attach(&button1, DOUBLE_CLICK, Callback_DOUBLE_Click_Handler);
     button_attach(&button1, LONG_PRESS_START, Callback_LONG_PRESS_START_Handler);
     button_start(&button1);
+
+    ControlState.ViewRefreshLock = true;
+    ControlState.ModelRefreshLock = true;
+    ControlState.KeyScanLock = true;
 }
 
 void controller() {
-    switch (kc.cStatus) {
-        case KS_RELEASE: {
-            ct_lock = false;
-            rt_lock = false;
-        } break;
-        case KS_PRESS: {
-            if (!ct_lock) {
-                changeScreen();
-                ct_lock = true;
-            }
-        } break;
-        case KS_LONGPRESS: {
-            if (!rt_lock) {
-                changeRotation();
-                rt_lock = true;
-            }
-        } break;
-        default:
-            break;
+    // if (ControlState.KeyScanLock == false) {
+    //     button_ticks();
+    //     ControlState.KeyScanLock = true;
+    // }
+
+    if (ControlState.ModelRefreshLock == false) {
+        model();
+        ControlState.ModelRefreshLock = true;
+    }
+
+    if (ControlState.ViewRefreshLock == false) {
+        view();
+        ControlState.ViewRefreshLock = true;
     }
 }
 
-void keyStatusScan() {
-    switch (kc.cStatus) {
-        case KS_RELEASE: {
-            if (KEY0 == 0) {
-                kc.cStatus = KS_PRESS_SHAKE;
-                kc.keyCount = 0;
-            }
-            break;
-        }
-        case KS_PRESS_SHAKE: {
-            kc.keyCount++;
-            if (KEY0 == 1) {
-                kc.cStatus = KS_RELEASE;
-            } else if (kc.keyCount == 3) {
-                kc.cStatus = KS_WAIT_CHECK;
-                kc.keyCount = 0;
-            }
-            break;
-        }
-        case KS_WAIT_CHECK: {
-            kc.keyCount++;
+// 5ms
+void BTIM1_IRQHandler() {
+    static uint32_t timecount = 0;
 
-            if (kc.keyCount >= 50) {
-                kc.cStatus = KS_LONGPRESS;
-                kc.keyCount = 0;
-            } else if (KEY0 == 1) {
-                kc.cStatus = KS_PRESS;
-                kc.keyCount = 0;
-            }
-            break;
+    if (BTIM_GetITStatus(CW_BTIM1, BTIM_IT_UPDATE)) {
+        BTIM_ClearITPendingBit(CW_BTIM1, BTIM_IT_UPDATE);
+
+        timecount++;
+
+        if (timecount % REFRESH_TICK_KEY == 0) {
+            button_ticks();
+            ControlState.KeyScanLock = false;
         }
-        case KS_PRESS: {
-            if (KEY0 == 1) {
-                kc.cStatus = KS_RELEASE_SHAKE;
-            }
-            break;
+
+        if (timecount % REFRESH_TICK_DATA == 0) {
+            ControlState.ModelRefreshLock = false;
         }
-        case KS_LONGPRESS: {
-            if (KEY0 == 1) {
-                kc.cStatus = KS_RELEASE_SHAKE;
-            }
-            break;
+
+        if (timecount % REFRESH_TICK_DISPLAY == 0) {
+            ControlState.ViewRefreshLock = false;
         }
-        case KS_DOUBLE_CLICK: {
-            // Todo
-            break;
+
+        if (timecount >= 1000) {
+            timecount = 0;
         }
-        case KS_RELEASE_SHAKE: {
-            kc.keyCount++;
-            if (KEY0 == 0) {
-                kc.cStatus = KS_WAIT_CHECK;
-            } else if (kc.keyCount == 3) {
-                kc.cStatus = KS_RELEASE;
-            }
-            break;
-        }
-        default: {
-            // Nothing
-            break;
-        }
-    }
-    if (kc.cStatus != kc.lStatus) {
-        kc.lStatus = kc.cStatus;
     }
 }

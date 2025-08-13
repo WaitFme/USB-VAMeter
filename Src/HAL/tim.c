@@ -5,6 +5,7 @@ void BTIM1_init() {
 
     __disable_irq();
     NVIC_EnableIRQ(BTIM1_IRQn);
+    NVIC_SetPriority(BTIM1_IRQn, 2);
     __enable_irq();
 
     BTIM_TimeBaseInitTypeDef tim1 = {
@@ -25,11 +26,12 @@ void BTIM2_init() {
 
     __disable_irq();
     NVIC_EnableIRQ(BTIM2_IRQn);
+    NVIC_SetPriority(BTIM2_IRQn, 1);
     __enable_irq();
 
     BTIM_TimeBaseInitTypeDef tim2 = {
         .BTIM_Mode = BTIM_MODE_TIMER,
-        .BTIM_Period = 50000 - 1,
+        .BTIM_Period = 4962 - 1, // 50000-49580
         .BTIM_Prescaler = 960 - 1,
     };
 

@@ -46,6 +46,7 @@ void LCD_DrawDottedLine(int x0, int y0, int x1, int y1, int dotLength, int space
 void LCD_DrawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 void LCD_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
 void LCD_ShowImage(uint16_t x_start, uint16_t y_start, uint16_t width, uint16_t height, uint16_t *pic);
+void LCD_ShowGrayImage(uint16_t x_start, uint16_t y_start, uint16_t width, uint16_t height, const uint8_t *pic);
 void LCD_ShowChinese(uint16_t x, uint16_t y, uint16_t index, uint8_t size, uint16_t pointcolor, uint16_t backcolor, uint8_t mode);
 void LCD_ShowCharBasic(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizex, uint8_t sizey, uint8_t mode);
 void LCD_ShowChar(uint16_t x, uint16_t y, uint8_t num, uint16_t fc, uint16_t bc, uint8_t sizey, uint8_t mode);

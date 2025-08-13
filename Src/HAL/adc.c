@@ -1,16 +1,5 @@
 #include "adc.h"
 
-// uint16_t Volt_Buffer[ADC_SAMPLE_SIZE];
-// uint16_t Curr_Buffer[ADC_SAMPLE_SIZE];
-// uint16_t V12V_Buffer[ADC_SAMPLE_SIZE];
-// uint16_t IPV1_Buffer[ADC_SAMPLE_SIZE];
-// uint16_t NTC_Buffer[ADC_SAMPLE_SIZE];
-
-uint16_t voltageAdcBuffer[ADC_SAMPLE_SIZE];
-uint16_t currentAdcBuffer[ADC_SAMPLE_SIZE];
-uint16_t offsetAdcBuffer[ADC_SAMPLE_SIZE];
-uint16_t ntcAdcBuffer[ADC_SAMPLE_SIZE];
-
 void ADC_Initial() {
     // 打开时钟
     __SYSCTRL_GPIOA_CLK_ENABLE();
@@ -44,16 +33,22 @@ void ADC_Initial() {
     ADC_SoftwareStartConvCmd(ENABLE);  // ADC转换软件启动命令
 }
 
-void getAdcValue() {
-    static uint8_t cnt;
+void initAdcData(AdcData* adcData) {
+    if (adcData != NULL) {
+        memset(adcData, 0, sizeof(AdcData));
+    }
+}
 
-    ADC_GetSqr0Result(&offsetAdcBuffer[cnt]);
-    ADC_GetSqr1Result(&currentAdcBuffer[cnt]);
-    ADC_GetSqr2Result(&voltageAdcBuffer[cnt]);
-    ADC_GetSqr4Result(&ntcAdcBuffer[cnt]);
+void getAdcValue(AdcData* adcData) {
+    if (adcData == NULL) return;
 
-    cnt++;
-    if (cnt >= ADC_SAMPLE_SIZE) {
-        cnt = 0;
+    ADC_GetSqr0Result(&adcData->offsetBuffer[adcData->currentIndex]);
+    ADC_GetSqr1Result(&adcData->currentBuffer[adcData->currentIndex]);
+    ADC_GetSqr2Result(&adcData->voltageBuffer[adcData->currentIndex]);
+    ADC_GetSqr4Result(&adcData->ntcBuffer[adcData->currentIndex]);
+
+    adcData->currentIndex++;
+    if (adcData->currentIndex >= ADC_SAMPLE_SIZE) {
+        adcData->currentIndex = 0;
     }
 }

@@ -17,10 +17,4 @@
 #define true  1
 #define false 0
 
-typedef struct {
-    uint8_t ViewRefreshLock;
-    uint8_t ModelRefreshLock;
-    uint8_t KeyScanLock;
-} MainState_TypeDef;
-
 #endif /* __MAIN_H */

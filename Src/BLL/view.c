@@ -3,9 +3,9 @@
 #include "icon.h"
 #include "model.h"
 
-viewState uistate;
+const AppState* uistate;
 
-void displayInit(uint8_t index) {
+static void displayInit(uint8_t index) {
     LCD_Fill(0, 0, LCD_W, LCD_H, BLACK);
 
     if (index == 0) {
@@ -56,38 +56,42 @@ void displayInit(uint8_t index) {
         LCD_ShowString(5, 60, "0.00", RED, BLACK, 16, 0);
         LCD_ShowString(41, 58, "o", RED, BLACK, 12, 0);
         LCD_ShowString(48, 60, "C", RED, BLACK, 16, 0);
+    } else if (index == 2) {
     }
 }
 
-void screens(uint8_t index) {
+static void screens(uint8_t index) {
     if (index == 0) {
-        LCD_ShowSmartFloatBasic(35, 2, uistate.voltage, 5, WHITE, BLACK, 16, 28, 1);
-        LCD_ShowSmartFloatBasic(35, 28, uistate.current, 5, WHITE, BLACK, 16, 28, 1);
-        LCD_ShowSmartFloatBasic(35, 54, uistate.power, 5, WHITE, BLACK, 16, 28, 1);
-        LCD_ShowChar(150, 34, uistate.directionChar, MY_GREEN, BLACK, 12, 1);
+        LCD_ShowSmartFloatBasic(35, 2, uistate->voltage, 5, WHITE, BLACK, 16, 28, 1);
+        LCD_ShowSmartFloatBasic(35, 28, uistate->current, 5, WHITE, BLACK, 16, 28, 1);
+        LCD_ShowSmartFloatBasic(35, 54, uistate->power, 5, WHITE, BLACK, 16, 28, 1);
+        LCD_ShowChar(150, 34, uistate->flowDIrChar, MY_GREEN, BLACK, 12, 1);
     } else if (index == 1) {
-        LCD_ShowSmartFloat(97, 2, uistate.voltage, 5, WHITE, ORANGE, 16, 1);
-        LCD_ShowSmartFloat(97, 22, uistate.current, 5, WHITE, SGREEN, 16, 1);
-        LCD_ShowSmartFloat(97, 42, uistate.power, 5, WHITE, GRAYBLUE, 16, 1);
-        LCD_ShowChar(2, 34, uistate.directionChar, MY_GREEN, BLACK, 12, 1);
-        LCD_ShowSmartFloat(5, 60, uistate.temperature, 5, RED, BLACK, 16, 1);
-        LCD_ShowSmartFloat(97, 62, uistate.electricity, 4, WHITE, BRRED, 16, 1);
-        LCD_ShowStringFormat(5, 22, BLUE, BLACK, 12, 1, "%02d:%02d:%02d", uistate.chargingHour, uistate.chargingMinute, uistate.chargingSecond);
+        LCD_ShowSmartFloat(97, 2, uistate->voltage, 5, WHITE, ORANGE, 16, 1);
+        LCD_ShowSmartFloat(97, 22, uistate->current, 5, WHITE, SGREEN, 16, 1);
+        LCD_ShowSmartFloat(97, 42, uistate->power, 5, WHITE, GRAYBLUE, 16, 1);
+        LCD_ShowChar(2, 34, uistate->flowDIrChar, MY_GREEN, BLACK, 12, 1);
+        LCD_ShowSmartFloat(5, 60, uistate->temperature, 4, RED, BLACK, 16, 1);
+        LCD_ShowSmartFloat(97, 62, uistate->totalEnergy, 5, WHITE, BRRED, 16, 1);
+        LCD_ShowStringFormat(5, 22, BLUE, BLACK, 12, 1, "%02d:%02d:%02d", uistate->chargingHour, uistate->chargingMinute, uistate->chargingSecond);
+    } else if (index == 2) {
+        // LCD_ShowStringFormat(5, 22, BLUE, BLACK, 12, 1, "%d", uistate->historyChargingtime);
+        // LCD_ShowSmartFloat(97, 2, uistate->historyTotalEnergy, 5, WHITE, ORANGE, 16, 1);
     }
 }
 
 void view() {
-    uistate = getState();
+    uistate = getAppState();
 
-    if (uistate.rotationLock == false) {
-        LCD_Rotation(uistate.rotation);
+    if (uistate->rotationLock == false) {
+        LCD_Rotation(uistate->rotation);
         setRotationLock(true);
     }
 
-    if (uistate.initLock == false) {
-        displayInit(uistate.screenIndex);
+    if (uistate->initLock == false) {
+        displayInit(uistate->screenIndex);
         setInitLock(true);
     }
 
-    screens(uistate.screenIndex);
+    screens(uistate->screenIndex);
 }

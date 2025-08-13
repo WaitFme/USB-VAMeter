@@ -18,22 +18,23 @@ typedef struct {
     double voltage;
     double current;
     double power;
-    double electricity;
+    double totalEnergy;
+    double historyTotalEnergy;
     double temperature;
     uint32_t chargingtime;
-    short currDirection;
+    uint32_t historyChargingtime;
     uint8_t rotation;
     bool rotationLock;
     bool initLock;
     uint8_t screenIndex;
-    char directionChar;
+    char flowDIrChar;
     uint16_t chargingHour;
     uint8_t chargingMinute;
     uint8_t chargingSecond;
-} viewState;
+} AppState;
 
 void model();
-viewState getState();
+const AppState* getAppState();
 void setRotationLock(bool value);
 void setInitLock(bool value);
 void changeScreen();

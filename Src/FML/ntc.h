@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-uint32_t GetNTCTable_Temp(float Vout);
+double getNtcTemp(float Vout);
 
 #endif
 

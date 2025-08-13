@@ -58,6 +58,7 @@ void LCD_Rotation(uint8_t rotation) {
     LCD_Fill(0, 0, LCD_W - 1, LCD_H - 1, BLACK);
 
     ST7735S_WriteCMD(0x36);
+    
     if (rotation) {
         ST7735S_WriteData(0x78);
     } else {
@@ -245,6 +246,22 @@ void LCD_ShowImage(uint16_t x_start, uint16_t y_start, uint16_t width, uint16_t 
     for (uint8_t i = y_start; i <= y_end; i++) {
         for (uint8_t j = x_start; j <= x_end; j++) {
             LCD_DrawPoint(j, i, *data++);
+        }
+    }
+}
+
+void LCD_ShowGrayImage(uint16_t x_start, uint16_t y_start, uint16_t width, uint16_t height, const uint8_t *pic) {
+    uint16_t x_end = x_start + width - 1;
+    uint16_t y_end = y_start + height - 1;
+
+    ST7735S_Address_Set(x_start, y_start, x_end, y_end);
+
+    for (uint16_t i = 0; i < height; i++) {
+        for (uint16_t j = 0; j < width; j++) {
+            uint8_t gray = pic[i * width + j];
+            // 将8位灰度转换为16位RGB565格式
+            uint16_t color = ((gray >> 3) << 11) | ((gray >> 2) << 5) | (gray >> 3);
+            LCD_DrawPoint(x_start + j, y_start + i, color);
         }
     }
 }
@@ -525,7 +542,7 @@ void LCD_ShowSmartFloatBasic(uint16_t x, uint16_t y, double num, uint8_t len, ui
             continue;
         }
         LCD_ShowCharBasic(x + pos * sizex, y, buffer[i], fc, bc, sizex, sizey, mode);
-        LCD_ShowCharBasic(x + pos * sizex, y, buffer[i], fc, bc, sizex, sizey, mode);
+        // LCD_ShowCharBasic(x + pos * sizex, y, buffer[i], fc, bc, sizex, sizey, mode);
         pos++;
     }
 }

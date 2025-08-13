@@ -1,6 +1,6 @@
 #include "ntc.h"
 
-const unsigned int NTC_Table[] = {
+const uint32_t NTC_Table[] = {
     32814, 31179, 29636, 28178, 26800, 25497, 24263, 23096, 21992, 20947,
     19958, 19022, 18135, 17294, 16498, 15742, 15025, 14345, 13699, 13086,
     12504, 11951, 11426, 10926, 10452, 10000, 9570, 9162, 8773, 8402,
@@ -14,11 +14,11 @@ const unsigned int NTC_Table[] = {
     675
 };
 
-unsigned int GetNTCTable_Temp(float Vout) {
-    unsigned int R1 = 10000;
-    unsigned int res = (Vout * R1) / (4095 - Vout);
-    unsigned int low = 0, high = 100, mid;
-    unsigned int dat;
+static uint32_t GetNTCTable_Temp(float Vout) {
+    uint32_t R1 = 10000;
+    uint32_t res = (Vout * R1) / (4095 - Vout);
+    uint32_t low = 0, high = 100, mid;
+    uint32_t dat;
 
     if (res > NTC_Table[low]) {
         return 0;
@@ -42,4 +42,8 @@ unsigned int GetNTCTable_Temp(float Vout) {
     }
     dat = low * 10 + (NTC_Table[low] - res) * 10 / (NTC_Table[low] - NTC_Table[high]);
     return dat;
+}
+
+double getNtcTemp(float Vout) {
+    return (double)GetNTCTable_Temp(Vout) / 10;
 }
