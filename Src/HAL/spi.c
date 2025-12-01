@@ -10,7 +10,7 @@ void SPI1_Init() {
     SYSCTRL_APBPeriphClk_Enable1(SYSCTRL_APB1_PERIPH_SPI, ENABLE);
 
     GPIO_InitTypeDef gpio = {
-        .IT   = GPIO_IT_NONE,
+        .IT = GPIO_IT_NONE,
         .Mode = GPIO_MODE_OUTPUT_PP,
         .Pins = SPI1_PIN_SCLK | SPI1_PIN_MOSI,
     };
@@ -22,15 +22,15 @@ void SPI1_Init() {
     PA01_AFx_SPI1NCS();
 
     SPI_InitTypeDef spi = {
-        .SPI_Direction         = SPI_Direction_1Line_TxOnly,
-        .SPI_Mode              = SPI_Mode_Master,
-        .SPI_DataSize          = SPI_DataSize_16b,
-        .SPI_CPOL              = SPI_CPOL_High,
-        .SPI_CPHA              = SPI_CPHA_2Edge,
-        .SPI_NSS               = SPI_NSS_Soft,
+        .SPI_Direction = SPI_Direction_1Line_TxOnly,
+        .SPI_Mode = SPI_Mode_Master,
+        .SPI_DataSize = SPI_DataSize_16b,
+        .SPI_CPOL = SPI_CPOL_High,
+        .SPI_CPHA = SPI_CPHA_2Edge,
+        .SPI_NSS = SPI_NSS_Soft,
         .SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2,
-        .SPI_FirstBit          = SPI_FirstBit_MSB,
-        .SPI_Speed             = SPI_Speed_High,
+        .SPI_FirstBit = SPI_FirstBit_MSB,
+        .SPI_Speed = SPI_Speed_High,
     };
     SPI_Init(CW_SPI, &spi);
 

@@ -76,6 +76,19 @@
           "proType": 1,
           "speed": 8000,
           "otherCmds": ""
+        },
+        "pyOCD": {
+          "bin": "",
+          "targetName": "cw32l010f8",
+          "baseAddr": "0x08000000",
+          "speed": "10M",
+          "config": ".eide/debug.pyocd.yaml",
+          "otherCmds": ""
+        },
+        "Custom": {
+          "bin": "",
+          "commandLine": "download.cmd",
+          "eraseChipCommand": ""
         }
       },
       "custom_dep": {
@@ -90,7 +103,9 @@
           "Core",
           "Main",
           ".cmsis/include",
-          "Src/APL/thirdParty"
+          "Src/APL/thirdParty",
+          "Src/APL/screen",
+          "Src/APL/utils"
         ],
         "libList": [],
         "defineList": []

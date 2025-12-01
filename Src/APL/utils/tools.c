@@ -46,24 +46,3 @@ void multiply(float* A, float* B, int m, int p, int n, float* C) {
         }
     }
 }
-
-// 均值滤波
-uint32_t meanValueFilter(uint16_t* value, uint32_t size) {
-    uint32_t sum = 0;
-    uint16_t max = 0;
-    uint16_t min = 0xffff;
-    int i;
-
-    for (i = 0; i < size; i++) {
-        sum += value[i];
-        if (value[i] > max) {
-            max = value[i];
-        }
-        if (value[i] < min) {
-            min = value[i];
-        }
-    }
-    sum -= max + min;
-    sum = sum / (size - 2);
-    return sum;
-}

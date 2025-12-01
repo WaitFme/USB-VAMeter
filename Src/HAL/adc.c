@@ -33,22 +33,18 @@ void ADC_Initial() {
     ADC_SoftwareStartConvCmd(ENABLE);  // ADC转换软件启动命令
 }
 
-void initAdcData(AdcData* adcData) {
-    if (adcData != NULL) {
-        memset(adcData, 0, sizeof(AdcData));
-    }
+uint16_t getChannelOffset() {
+    return (uint16_t)(CW_ADC->RESULT0);
 }
 
-void getAdcValue(AdcData* adcData) {
-    if (adcData == NULL) return;
+uint16_t getChannelCurrent() {
+    return (uint16_t)(CW_ADC->RESULT1);
+}
 
-    ADC_GetSqr0Result(&adcData->offsetBuffer[adcData->currentIndex]);
-    ADC_GetSqr1Result(&adcData->currentBuffer[adcData->currentIndex]);
-    ADC_GetSqr2Result(&adcData->voltageBuffer[adcData->currentIndex]);
-    ADC_GetSqr4Result(&adcData->ntcBuffer[adcData->currentIndex]);
+uint16_t getChannelVoltage() {
+    return (uint16_t)(CW_ADC->RESULT2);
+}
 
-    adcData->currentIndex++;
-    if (adcData->currentIndex >= ADC_SAMPLE_SIZE) {
-        adcData->currentIndex = 0;
-    }
+uint16_t getChannelNtc() {
+    return (uint16_t)(CW_ADC->RESULT4);
 }

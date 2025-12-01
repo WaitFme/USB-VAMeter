@@ -2,7 +2,9 @@
 #define VIEW_H
 
 #include "main.h"
+#include "controller.h"
 
-void view();
+void View_Init();
+void View(const AppState* uistate);
 
 #endif  // !VIEW_H

@@ -5,6 +5,6 @@
 
 void BTIM1_init();
 void BTIM2_init();
-void timer2Enable(FunctionalState NewState);
+void BTIM2_Cmd(FunctionalState NewState);
 
 #endif // !TIM_H

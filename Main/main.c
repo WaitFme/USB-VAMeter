@@ -1,23 +1,20 @@
 #include "main.h"
 #include "lcd.h"
 #include "spi.h"
-#include "sysctrl.h"
+#include "rcc.h"
 #include "key.h"
 #include "tim.h"
 #include "adc.h"
-#include "model.h"
-#include "view.h"
 #include "controller.h"
-#include "multi_button.h"
 
 void initial() {
-    SYSCTRL_Configuration();
+    SystemClock_Init();
 
-    InitTick(48000000);
+    Systick_Init();
 
     ADC_Initial();
 
-    BTIM1_init();
+    // BTIM1_init();
 
     BTIM2_init();
 
@@ -27,13 +24,13 @@ void initial() {
 
     Key_Init();
 
-    controllerInit();
+    Controller_Init();
 }
 
 int main() {
     initial();
 
     while (1) {
-        controller();
+        Controller();
     }
 }

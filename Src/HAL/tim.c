@@ -10,7 +10,7 @@ void BTIM1_init() {
 
     BTIM_TimeBaseInitTypeDef tim1 = {
         .BTIM_Mode = BTIM_MODE_TIMER,
-        .BTIM_Period = 500 - 1, // 100
+        .BTIM_Period = 500 - 1,  // 100
         .BTIM_Prescaler = 480 - 1,
     };
     BTIM_TimeBaseInit(CW_BTIM1, &tim1);
@@ -31,15 +31,48 @@ void BTIM2_init() {
 
     BTIM_TimeBaseInitTypeDef tim2 = {
         .BTIM_Mode = BTIM_MODE_TIMER,
-        .BTIM_Period = 4962 - 1, // 50000-49580
+        .BTIM_Period = 4962 - 1,  // 50000-49580
         .BTIM_Prescaler = 960 - 1,
     };
 
     BTIM_TimeBaseInit(CW_BTIM2, &tim2);
-    BTIM_Cmd(CW_BTIM2, ENABLE);
+    BTIM2_Cmd(ENABLE);
 }
 
-void timer2Enable(FunctionalState NewState) {
-    // 使能BTIMx的溢出中断
-    BTIM_ITConfig(CW_BTIM2, BTIM_IT_UPDATE, NewState);
+static volatile uint8_t btim2_state = 0;
+
+/**
+ * @brief  启用/禁用 BTIM2
+ * @param  NewState: ENABLE 或 DISABLE
+ * @note   ENABLE 时自动清零计数器
+ */
+void BTIM2_Cmd(FunctionalState NewState) {
+    if ((NewState == ENABLE && btim2_state == 1) ||
+        (NewState == DISABLE && btim2_state == 0)) {
+        return;
+    }
+
+    if (NewState == ENABLE) {
+        BTIM_SetCounter(CW_BTIM2, 0);
+        BTIM_ClearITPendingBit(CW_BTIM2, BTIM_IT_UPDATE);
+        BTIM_ITConfig(CW_BTIM2, BTIM_IT_UPDATE, ENABLE);
+        BTIM_Cmd(CW_BTIM2, ENABLE);
+        btim2_state = 1;
+    } else {
+        BTIM_Cmd(CW_BTIM2, DISABLE);
+        BTIM_ITConfig(CW_BTIM2, BTIM_IT_UPDATE, DISABLE);
+        BTIM_ClearITPendingBit(CW_BTIM2, BTIM_IT_UPDATE);
+        btim2_state = 0;
+    }
 }
+
+/**
+ * @BTIM1_IRQHandler 5ms
+ */
+// void BTIM1_IRQHandler() {
+//     if (BTIM_GetITStatus(CW_BTIM1, BTIM_IT_UPDATE)) {
+//         BTIM_ClearITPendingBit(CW_BTIM1, BTIM_IT_UPDATE);
+
+//         button_ticks();
+//     }
+// }

@@ -1,81 +1,83 @@
-#include "multi_button.h"
 #include "controller.h"
 #include "model.h"
 #include "view.h"
 #include "key.h"
 #include "lcd.h"
+#include "metro.h"
+#include "multi_button.h"
+#include "screen_manager.h"
+#include "image_xzm.h"
 
-#define REFRESH_TICK_KEY     1
-#define REFRESH_TICK_DATA    5
-#define REFRESH_TICK_DISPLAY 25
+static AppState vstate;
+static struct Button button1;
 
-ControlState_TypeDef ControlState;
+static Metro key_metro = {.intervalTick = 5};
+static Metro model_metro = {.intervalTick = 25};
+static Metro view_metro = {.intervalTick = 200};
 
-struct Button button1;
+static screen_id_t screenIndex = SCREEN_HOME;
+static uint8_t rotation = 0;
+static uint8_t view_refresh_mode = 0;
 
 void Callback_SINGLE_CLICK_Handler(void* btn) {
-    changeScreen();
+    if (view_refresh_mode < 3) {
+        view_metro.intervalTick = 200 - (view_refresh_mode * 50);
+        vstate.refreshLevel = view_refresh_mode;
+        view_refresh_mode++;
+    } else {
+        view_refresh_mode = 0;
+    }
 }
 
-// void Callback_DOUBLE_Click_Handler(void* btn) { }
+void Callback_DOUBLE_Click_Handler(void* btn) {
+    screenIndex++;
+    if (screenIndex >= SCREEN_COUNT) {
+        screenIndex = SCREEN_HOME;
+    }
+    screenManagerSwitchTo(screenIndex);
+}
 
 void Callback_LONG_PRESS_START_Handler(void* btn) {
-    changeRotation();
+    rotation = !rotation;
+    resetStateMachine();
+    LCD_Rotation(rotation);
 }
 
-void controllerInit() {
+void Controller_Init() {
     button_init(&button1, readButton, 0, 0);
+
     button_attach(&button1, SINGLE_CLICK, Callback_SINGLE_CLICK_Handler);
-    // button_attach(&button1, DOUBLE_CLICK, Callback_DOUBLE_Click_Handler);
+    button_attach(&button1, DOUBLE_CLICK, Callback_DOUBLE_Click_Handler);
     button_attach(&button1, LONG_PRESS_START, Callback_LONG_PRESS_START_Handler);
+
     button_start(&button1);
 
-    ControlState.ViewRefreshLock = true;
-    ControlState.ModelRefreshLock = true;
-    ControlState.KeyScanLock = true;
+    Model_Init();
+
+    View_Init();
+
+    vstate.historyChargingtime = 0;
+    vstate.historyTotalEnergy = 0;
+
+    LCD_ShowImage(50, 10, 60, 60, (uint16_t*)gImage_xzm);
+
+    delay(500);
 }
 
-void controller() {
-    // if (ControlState.KeyScanLock == false) {
-    //     button_ticks();
-    //     ControlState.KeyScanLock = true;
-    // }
-
-    if (ControlState.ModelRefreshLock == false) {
-        model();
-        ControlState.ModelRefreshLock = true;
+void Controller() {
+    if (MetroCheck(&key_metro) == 1) {
+        button_ticks();
     }
 
-    if (ControlState.ViewRefreshLock == false) {
-        view();
-        ControlState.ViewRefreshLock = true;
+    if (MetroCheck(&model_metro) == 1) {
+        Model(&vstate);
+    }
+
+    if (MetroCheck(&view_metro) == 1) {
+        View((const AppState*)&vstate);
     }
 }
 
-// 5ms
-void BTIM1_IRQHandler() {
-    static uint32_t timecount = 0;
-
-    if (BTIM_GetITStatus(CW_BTIM1, BTIM_IT_UPDATE)) {
-        BTIM_ClearITPendingBit(CW_BTIM1, BTIM_IT_UPDATE);
-
-        timecount++;
-
-        if (timecount % REFRESH_TICK_KEY == 0) {
-            button_ticks();
-            ControlState.KeyScanLock = false;
-        }
-
-        if (timecount % REFRESH_TICK_DATA == 0) {
-            ControlState.ModelRefreshLock = false;
-        }
-
-        if (timecount % REFRESH_TICK_DISPLAY == 0) {
-            ControlState.ViewRefreshLock = false;
-        }
-
-        if (timecount >= 1000) {
-            timecount = 0;
-        }
-    }
+uint8_t getRotation() {
+    return rotation;
 }

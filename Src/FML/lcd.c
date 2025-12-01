@@ -9,7 +9,8 @@
  *
  */
 #include "lcd.h"
-#include "lcdfont.h"
+#include "asciiFont.h"
+#include "hansFont.h"
 #include "math.h"
 #include "tools.h"
 #include <string.h>
@@ -58,7 +59,7 @@ void LCD_Rotation(uint8_t rotation) {
     LCD_Fill(0, 0, LCD_W - 1, LCD_H - 1, BLACK);
 
     ST7735S_WriteCMD(0x36);
-    
+
     if (rotation) {
         ST7735S_WriteData(0x78);
     } else {
