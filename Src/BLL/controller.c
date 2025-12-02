@@ -15,32 +15,30 @@ static Metro key_metro = {.intervalTick = 5};
 static Metro model_metro = {.intervalTick = 25};
 static Metro view_metro = {.intervalTick = 200};
 
-static screen_id_t screenIndex = SCREEN_HOME;
-static uint8_t rotation = 0;
-static uint8_t view_refresh_mode = 0;
+static screen_id_t screen_index = SCREEN_HOME;
+static uint8_t screen_direct = SCREEN_DIRECT_POSITIVE;
 
 void Callback_SINGLE_CLICK_Handler(void* btn) {
-    if (view_refresh_mode < 3) {
-        view_metro.intervalTick = 200 - (view_refresh_mode * 50);
-        vstate.refreshLevel = view_refresh_mode;
-        view_refresh_mode++;
+    if (vstate.refreshLevel < 3) {
+        view_metro.intervalTick = 200 - (vstate.refreshLevel * 50);
+        vstate.refreshLevel++;
     } else {
-        view_refresh_mode = 0;
+        vstate.refreshLevel = 0;
     }
 }
 
 void Callback_DOUBLE_Click_Handler(void* btn) {
-    screenIndex++;
-    if (screenIndex >= SCREEN_COUNT) {
-        screenIndex = SCREEN_HOME;
+    screen_index++;
+    if (screen_index >= SCREEN_COUNT) {
+        screen_index = SCREEN_HOME;
     }
-    screenManagerSwitchTo(screenIndex);
+    screenManagerSwitchTo(screen_index);
 }
 
 void Callback_LONG_PRESS_START_Handler(void* btn) {
-    rotation = !rotation;
+    screen_direct = !screen_direct;
     resetStateMachine();
-    LCD_Rotation(rotation);
+    LCD_Rotation(screen_direct);
 }
 
 void Controller_Init() {
@@ -56,6 +54,7 @@ void Controller_Init() {
 
     View_Init();
 
+    vstate.refreshLevel = 0;
     vstate.historyChargingtime = 0;
     vstate.historyTotalEnergy = 0;
 
@@ -79,5 +78,5 @@ void Controller() {
 }
 
 uint8_t getRotation() {
-    return rotation;
+    return screen_direct;
 }

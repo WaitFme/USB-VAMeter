@@ -98,7 +98,7 @@ static void updateAppState(AppState* uistate) {
             uistate->chargingHour = mChargingtime / 3600;
             break;
         }
-        case CHARGE_STATE_COMPLETED: {
+        case CHARGE_STATE_IDLE: {
             uistate->historyChargingtime = mHistoryChargingtime;
             uistate->historyTotalEnergy = mHistoryTotalEnergy;
             break;
@@ -154,7 +154,7 @@ static void ChargeStateMachine() {
 
         case CHARGE_STATE_COMPLETED: {
             if (mCurrent > CURRENT_THRESHOLD) {
-                mChargeState = CHARGE_STATE_STARTING;
+                mChargeState = CHARGE_STATE_CHARGING;
             } else {
                 mChargeState = CHARGE_STATE_IDLE;
 

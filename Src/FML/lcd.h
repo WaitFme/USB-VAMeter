@@ -37,7 +37,7 @@
 
 void LCD_Init();
 void LCD_Clear();
-void LCD_Rotation(uint8_t rotation);
+void LCD_Rotation(uint8_t screen_direct);
 void LCD_Fill_All(uint16_t color);
 void LCD_Fill(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16_t color);
 void LCD_DrawPoint(uint16_t x, uint16_t y, uint16_t color);

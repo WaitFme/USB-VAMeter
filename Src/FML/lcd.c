@@ -55,12 +55,12 @@ void LCD_Fill_All(uint16_t color) {
     LCD_Fill(0, 0, LCD_W - 1, LCD_H - 1, color);
 }
 
-void LCD_Rotation(uint8_t rotation) {
+void LCD_Rotation(uint8_t screen_direct) {
     LCD_Fill(0, 0, LCD_W - 1, LCD_H - 1, BLACK);
 
     ST7735S_WriteCMD(0x36);
 
-    if (rotation) {
+    if (screen_direct) {
         ST7735S_WriteData(0x78);
     } else {
         ST7735S_WriteData(0xA8);
